@@ -1,7 +1,7 @@
 import { CLR, btn, ttsStopBtn, setStatus, autoCb, toggleCb, ttsCb, ttsManualCb,
          ensureAudio, getAudioCtx, beep, ttsRate, ttsPitch, elevenLabsCb, openAiCb,
          openAiKeyInput, elevenKeyInput, openAiModel, openAiVoice, ttsProvider, ac,
-         disable as uiDisable, enable as uiEnable } from './ui.js';
+         disable as uiDisable, enable as uiEnable, reinit as uiReinit } from './ui.js';
 
 const ELEVEN_VOICE_ID = 'JBFqnCBsd6RMkjVDRZzb'; // George
 let enabled = true;
@@ -482,8 +482,18 @@ function voiceEnable() {
     uiEnable();
 }
 
+function voiceReinit() {
+    uiReinit();
+    const dc = document.getElementById('dialog-container');
+    if (dc) {
+        dc.querySelectorAll('[data-mtype]').forEach(addPlayBtn);
+        playBtnObserver.observe(dc, { childList: true });
+    }
+}
+
 window.addEventListener('message', (e) => {
     if (e.source !== window) return;
     if (e.data?.type === 'solveit-voice-disable') voiceDisable();
     if (e.data?.type === 'solveit-voice-enable') voiceEnable();
+    if (e.data?.type === 'solveit-voice-reinit') voiceReinit();
 });

@@ -33,7 +33,13 @@
     async function tryInit() {
         if (!document.getElementById('dialog-container')) { log('no dialog-container'); return; }
         const { enabled = true } = await chrome.storage.local.get('enabled');
-        if (enabled) inject();
+        if (!enabled) { log('disabled, skipping'); return; }
+        if (document.querySelector('script[data-solveit-voice]')) {
+            log('script loaded, sending reinit');
+            window.postMessage({ type: 'solveit-voice-reinit' }, '*');
+        } else {
+            inject();
+        }
     }
 
     // Listen for toggle messages from popup

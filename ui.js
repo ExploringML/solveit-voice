@@ -237,3 +237,8 @@ export function enable() {
     div.style.display = '';
     document.querySelectorAll('.sv-play').forEach(el => el.style.display = '');
 }
+
+export function reinit() {
+    if (!document.getElementById('solveit-voice')) document.body.appendChild(div);
+    if (!document.getElementById('solveit-voice-styles')) document.head.appendChild(styleEl);
+}
