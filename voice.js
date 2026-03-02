@@ -8,12 +8,12 @@ let enabled = true;
 const getOpenAiKey = () => document.documentElement.dataset.solveitOpenAiKey || '';
 const getElevenKey = () => document.documentElement.dataset.solveitElevenKey || '';
 
-const dname = document.documentElement.dataset.solveitDname;
-if (!dname) throw new Error('No dname');
+const getDname = () => document.documentElement.dataset.solveitDname;
+if (!getDname()) throw new Error('No dname');
 
 const DEBUG = false;
 const log = (...args) => { if (DEBUG) console.log('[SV-Voice]', ...args); };
-log('Init, dname:', dname);
+log('Init, dname:', getDname());
 
 const CFG = {
     silenceMs: 1500, watchdogMs: 5000, restartMs: 300, retryMs: 1000,
@@ -252,7 +252,7 @@ async function sendTranscript(text) {
     setStatus('📤 Sending: ' + text.slice(0, 40) + '...', CLR.warn);
     try {
         const body = new URLSearchParams({
-            dlg_name: dname, content: (autoCb.checked ? '🎤 Voice [autorun]: ' : '🎤 Voice: ') + text,
+            dlg_name: getDname(), content: (autoCb.checked ? '🎤 Voice [autorun]: ' : '🎤 Voice: ') + text,
             msg_type: 'prompt', placement: 'at_end', run_mode: 'run'
         });
         const resp = await fetch('/add_relative_', { method: 'POST', body });

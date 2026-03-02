@@ -35,7 +35,10 @@
         const { enabled = true } = await chrome.storage.local.get('enabled');
         if (!enabled) { log('disabled, skipping'); return; }
         if (document.querySelector('script[data-solveit-voice]')) {
-            log('script loaded, sending reinit');
+            const dname = new URLSearchParams(window.location.search).get('name')
+                || document.getElementById('dlg_name')?.value;
+            document.documentElement.dataset.solveitDname = dname || '';
+            log('script loaded, sending reinit, dname:', dname);
             window.postMessage({ type: 'solveit-voice-reinit' }, '*');
         } else {
             inject();
