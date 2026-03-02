@@ -48,6 +48,10 @@ Toggle **Continuous mode** off in the settings gear to switch to push-to-talk.
 2. Speak your command
 3. Click **stop** (⏹) when done — the command is sent automatically
 
+### Tools
+
+For the auto-run code feature to work, you'll need to add a note message at the top of your dialog with `` &`run_msg` `` to allow SolveIt to automatically run messages on your behalf.
+
 ## Settings
 
 Click the **gear icon** (⚙️) on the widget to access settings.

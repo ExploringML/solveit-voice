@@ -444,7 +444,8 @@ function addPlayBtn(msgEl) {
         setPlayBtn(playBtn, 'idle');
         activePlayBtn = null;
     };
-    btns.prepend(playBtn);
+    const btnGroup = btns.querySelector('.flex.flex-row') || btns;
+    btnGroup.prepend(playBtn);
 }
 
 // Patch tts.stop to also reset active play button
