@@ -1,15 +1,25 @@
 (async function() {
+    const DEBUG = true;
+    const log = (...args) => DEBUG && console.log('[SolveIt Voice]', ...args);
+
+    log('content script running, url:', location.href);
+
     if (!document.getElementById('dialog-container')) {
+        log('dialog-container not found, retrying in 1s...');
         await new Promise(r => setTimeout(r, 1000));
         if (!document.getElementById('dialog-container')) {
-            console.warn('[SolveIt Voice] dialog-container not found, extension not loaded.');
+            console.warn('[SolveIt Voice] dialog-container not found after retry, extension not loaded.');
             return;
         }
+        log('dialog-container found on retry');
+    } else {
+        log('dialog-container found immediately');
     }
 
     const dname = new URLSearchParams(window.location.search).get('name')
         || document.getElementById('dlg_name')?.value;
-    if (!dname) return;
+    log('dname:', dname);
+    if (!dname) { log('no dname, aborting'); return; }
 
     // Listen for key updates from the page and save to storage
     window.addEventListener('message', (e) => {
@@ -20,7 +30,8 @@
     });
 
     async function inject() {
-        if (document.querySelector('script[data-solveit-voice]')) return;
+        log('inject() called');
+        if (document.querySelector('script[data-solveit-voice]')) { log('script already loaded, skipping'); return; }
         const { openAiKey = '', elevenKey = '' } = await chrome.storage.local.get(['openAiKey', 'elevenKey']);
         document.documentElement.dataset.solveitDname = dname;
         document.documentElement.dataset.solveitOpenAiKey = openAiKey || '';
