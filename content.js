@@ -1,5 +1,11 @@
 (async function() {
-    if (!document.getElementById('dialog-container')) return;
+    if (!document.getElementById('dialog-container')) {
+        await new Promise(r => setTimeout(r, 1000));
+        if (!document.getElementById('dialog-container')) {
+            console.warn('[SolveIt Voice] dialog-container not found, extension not loaded.');
+            return;
+        }
+    }
 
     const dname = new URLSearchParams(window.location.search).get('name')
         || document.getElementById('dlg_name')?.value;
