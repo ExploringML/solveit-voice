@@ -316,7 +316,12 @@ rec.onend = async () => {
     log('rec.onend, state:', state, 'lastErr:', lastRecError);
     const err = lastRecError; lastRecError = null;
     if (state !== 'listen' && state !== 'command') return;
-    if (err === 'aborted') { log('rec aborted, going idle'); go('idle'); return; }
+    if (err === 'aborted') {
+        log('rec aborted, cont:', toggleCb.checked);
+        if (toggleCb.checked) { state = 'idle'; setStatus('⏸ Mic stopped — click mic to resume', CLR.muted); }
+        else go('idle');
+        return;
+    }
     if (toggleCb.checked) {
         if (state === 'command' && !silenceTimer) go('listen');
         else startRec(CFG.restartMs);
