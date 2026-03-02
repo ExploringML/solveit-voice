@@ -62,9 +62,10 @@ function go(s, delay = CFG.restartMs) {
     state = s;
     if (s === 'listen') {
         resetCmd();
+        claimMic();
         if (toggleCb.checked) { btn.style.display = 'none'; setStatus('👂 Listening for "Solveit"...', CLR.info); }
         else { btn.textContent = '⏹'; setStatus('🟢 Listening...', CLR.ok); }
-        startRec(delay);
+        startRec(Math.max(delay, 200));
     } else if (s === 'command') {
         beep(CFG.beepFreq, CFG.beepDur);
         setStatus('🟢 Speak your command...', CLR.ok);
@@ -391,8 +392,7 @@ document.addEventListener('visibilitychange', () => {
 
 window.addEventListener('focus', () => {
     if (!enabled) return;
-    claimMic();
-    if (wasListening) { wasListening = false; go('listen', 100); }
+    if (wasListening) { wasListening = false; go('listen', 150); }
 }, { signal: ac.signal });
 
 // --- WS listener for TTS ---
