@@ -85,7 +85,7 @@ function makeKeyInput(storageKey, inputEl) {
 export const autoCb = { checked: false };
 export const toggleCb = { checked: false };
 export const ttsCb = { checked: true };
-export const ttsManualCb = { checked: true };
+export const ttsManualCb = { checked: false };
 export const ttsRate = { value: 1.15 };
 export const ttsPitch = { value: 1.05 };
 
@@ -212,24 +212,27 @@ div.addEventListener('mousedown', (e) => {
     dragX = e.clientX - div.getBoundingClientRect().left;
     dragY = e.clientY - div.getBoundingClientRect().top;
     div.style.cursor = 'grabbing';
-});
-const dragAc = new AbortController();
+}, { signal: ac.signal });
+export const ac = new AbortController();
 document.addEventListener('mousemove', (e) => {
     if (!isDragging) return;
     Object.assign(div.style, { left: (e.clientX-dragX)+'px', top: (e.clientY-dragY)+'px', right: 'auto', bottom: 'auto' });
-}, { signal: dragAc.signal });
-document.addEventListener('mouseup', () => { if (isDragging) { isDragging = false; div.style.cursor = 'grab'; } }, { signal: dragAc.signal });
+}, { signal: ac.signal });
+document.addEventListener('mouseup', () => { if (isDragging) { isDragging = false; div.style.cursor = 'grab'; } }, { signal: ac.signal });
 
 // --- Close dropdown on outside click ---
 document.addEventListener('click', (e) => {
     if (ddOpen && !dropdown.contains(e.target) && e.target !== gearBtn) { ddOpen = false; dropdown.style.display = 'none'; setGear(false); }
-}, { signal: dragAc.signal });
+}, { signal: ac.signal });
 
 export { CLR };
 
 export function cleanup() {
-    dragAc.abort();
+    ac.abort();
+    speechSynthesis?.cancel();
     if (audioCtx) try { audioCtx.close(); } catch(e) {}
+    document.querySelectorAll('.sv-play').forEach(el => el.remove());
     div.remove();
     document.getElementById('solveit-voice-styles')?.remove();
+    document.querySelector('script[data-solveit-voice]')?.remove();
 }

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { width: 200px; padding: 12px; font-family: system-ui; font-size: 14px; }
+    .row { display: flex; align-items: center; justify-content: space-between; }
+    .track { display: inline-block; width: 36px; height: 18px; border-radius: 9px; background: #ccc; position: relative; cursor: pointer; transition: background 0.2s; }
+    .track.on { background: #4caf50; }
+    .track::after { content: ''; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: white; transition: transform 0.2s; }
+    .track.on::after { transform: translateX(18px); }
+  </style>
+</head>
+<body>
+  <div class="row">
+    <span>SolveIt Voice</span>
+    <div id="toggle" class="track on"></div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

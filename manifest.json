@@ -2,12 +2,14 @@
   "manifest_version": 3,
   "name": "SolveIt Voice",
   "version": "0.1",
+  "description": "Voice control for SolveIt — speak commands, hear AI responses, hands-free coding.",
   "content_scripts": [{
     "matches": ["<all_urls>"],
     "js": ["content.js"],
     "run_at": "document_idle"
   }],
-  "permissions": ["storage"],
+  "action": { "default_popup": "popup.html" },
+  "permissions": ["storage", "tabs"],
   "web_accessible_resources": [{
     "resources": ["ui.js", "voice.js"],
     "matches": ["<all_urls>"]

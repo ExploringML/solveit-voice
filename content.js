@@ -5,11 +5,6 @@
         || document.getElementById('dlg_name')?.value;
     if (!dname) return;
 
-    const { openAiKey = '', elevenKey = '' } = await chrome.storage.local.get(['openAiKey', 'elevenKey']);
-    document.documentElement.dataset.solveitDname = dname;
-    document.documentElement.dataset.solveitOpenAiKey = openAiKey;
-    document.documentElement.dataset.solveitElevenKey = elevenKey;
-
     // Listen for key updates from the page and save to storage
     window.addEventListener('message', (e) => {
         if (e.source !== window || e.data?.type !== 'solveit-save-key') return;
@@ -18,8 +13,31 @@
         document.documentElement.dataset[key === 'openAiKey' ? 'solveitOpenAiKey' : 'solveitElevenKey'] = value;
     });
 
-    const s = document.createElement('script');
-    s.type = 'module';
-    s.src = chrome.runtime.getURL('voice.js');
-    document.head.appendChild(s);
+    function inject() {
+        if (document.querySelector('script[data-solveit-voice]')) return;
+        const { openAiKey = '', elevenKey = '' } = chrome.storage.local.get(['openAiKey', 'elevenKey']);
+        document.documentElement.dataset.solveitDname = dname;
+        document.documentElement.dataset.solveitOpenAiKey = openAiKey || '';
+        document.documentElement.dataset.solveitElevenKey = elevenKey || '';
+        const s = document.createElement('script');
+        s.type = 'module';
+        s.dataset.solveitVoice = '1';
+        s.src = chrome.runtime.getURL('voice.js');
+        document.head.appendChild(s);
+    }
+
+    function remove() {
+        window.postMessage({ type: 'solveit-voice-cleanup' }, '*');
+    }
+
+    // Listen for toggle messages from popup
+    chrome.runtime.onMessage.addListener((msg) => {
+        if (msg.type !== 'solveit-voice-toggle') return;
+        if (msg.enabled) inject();
+        else remove();
+    });
+
+    // Check initial state
+    const { enabled = true } = await chrome.storage.local.get('enabled');
+    if (enabled) inject();
 })();

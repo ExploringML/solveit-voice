@@ -1,6 +1,6 @@
 import { CLR, btn, ttsStopBtn, setStatus, autoCb, toggleCb, ttsCb, ttsManualCb,
          ensureAudio, getAudioCtx, beep, cleanup as uiCleanup, ttsRate, ttsPitch, elevenLabsCb, openAiCb,
-         openAiKeyInput, elevenKeyInput, openAiModel, openAiVoice, ttsProvider } from './ui.js';
+         openAiKeyInput, elevenKeyInput, openAiModel, openAiVoice, ttsProvider, ac } from './ui.js';
 
 const ELEVEN_VOICE_ID = 'JBFqnCBsd6RMkjVDRZzb'; // George
 const getOpenAiKey = () => document.documentElement.dataset.solveitOpenAiKey || '';
@@ -475,3 +475,10 @@ window[Symbol.for('solveit.voice.cleanup')] = () => {
     tts.cleanup();
     uiCleanup();
 };
+
+// Listen for disable message from content script
+window.addEventListener('message', (e) => {
+    if (e.source === window && e.data?.type === 'solveit-voice-cleanup') {
+        window[Symbol.for('solveit.voice.cleanup')]?.();
+    }
+});
