@@ -318,7 +318,7 @@ rec.onend = async () => {
     if (state !== 'listen' && state !== 'command') return;
     if (err === 'aborted') {
         log('rec aborted, cont:', toggleCb.checked);
-        if (toggleCb.checked) { state = 'idle'; setStatus('⏸ Mic stopped — click mic to resume', CLR.muted); }
+        if (toggleCb.checked) { state = 'idle'; setStatus('⏸ Mic stopped — click here to resume', CLR.muted, () => go('listen', 100)); }
         else go('idle');
         return;
     }

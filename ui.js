@@ -102,7 +102,11 @@ const status = el('span', 'v-status');
 export const ttsStopBtn = el('button', 'v-tts-stop', { textContent: '⏹', title: 'Stop speech' });
 ttsStopBtn.style.display = 'none';
 
-export function setStatus(text, color = CLR.muted) { status.textContent = text; status.style.color = color; }
+export function setStatus(text, color = CLR.muted, onClick = null) {
+    status.textContent = text; status.style.color = color;
+    status.style.cursor = onClick ? 'pointer' : 'default';
+    status.onclick = onClick;
+}
 setStatus('Click mic to start');
 
 // --- Gear dropdown ---
