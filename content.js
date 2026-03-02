@@ -13,9 +13,9 @@
         document.documentElement.dataset[key === 'openAiKey' ? 'solveitOpenAiKey' : 'solveitElevenKey'] = value;
     });
 
-    function inject() {
+    async function inject() {
         if (document.querySelector('script[data-solveit-voice]')) return;
-        const { openAiKey = '', elevenKey = '' } = chrome.storage.local.get(['openAiKey', 'elevenKey']);
+        const { openAiKey = '', elevenKey = '' } = await chrome.storage.local.get(['openAiKey', 'elevenKey']);
         document.documentElement.dataset.solveitDname = dname;
         document.documentElement.dataset.solveitOpenAiKey = openAiKey || '';
         document.documentElement.dataset.solveitElevenKey = elevenKey || '';
@@ -26,15 +26,15 @@
         document.head.appendChild(s);
     }
 
-    function remove() {
-        window.postMessage({ type: 'solveit-voice-cleanup' }, '*');
-    }
-
     // Listen for toggle messages from popup
     chrome.runtime.onMessage.addListener((msg) => {
         if (msg.type !== 'solveit-voice-toggle') return;
-        if (msg.enabled) inject();
-        else remove();
+        if (msg.enabled) {
+            if (!document.querySelector('script[data-solveit-voice]')) inject();
+            else window.postMessage({ type: 'solveit-voice-enable' }, '*');
+        } else {
+            window.postMessage({ type: 'solveit-voice-disable' }, '*');
+        }
     });
 
     // Check initial state

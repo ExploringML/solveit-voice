@@ -1,8 +1,10 @@
 import { CLR, btn, ttsStopBtn, setStatus, autoCb, toggleCb, ttsCb, ttsManualCb,
-         ensureAudio, getAudioCtx, beep, cleanup as uiCleanup, ttsRate, ttsPitch, elevenLabsCb, openAiCb,
-         openAiKeyInput, elevenKeyInput, openAiModel, openAiVoice, ttsProvider, ac } from './ui.js';
+         ensureAudio, getAudioCtx, beep, ttsRate, ttsPitch, elevenLabsCb, openAiCb,
+         openAiKeyInput, elevenKeyInput, openAiModel, openAiVoice, ttsProvider, ac,
+         disable as uiDisable, enable as uiEnable } from './ui.js';
 
 const ELEVEN_VOICE_ID = 'JBFqnCBsd6RMkjVDRZzb'; // George
+let enabled = true;
 const getOpenAiKey = () => document.documentElement.dataset.solveitOpenAiKey || '';
 const getElevenKey = () => document.documentElement.dataset.solveitElevenKey || '';
 
@@ -365,6 +367,7 @@ go('idle');
 // --- Tab visibility ---
 let wasListening = false;
 document.addEventListener('visibilitychange', () => {
+    if (!enabled) return;
     if (document.hidden) {
         wasListening = (state === 'listen' || state === 'command');
         if (wasListening) go('idle');
@@ -375,6 +378,7 @@ document.addEventListener('visibilitychange', () => {
 
 // --- WS listener for TTS ---
 document.body.addEventListener('htmx:wsAfterMessage', (e) => {
+    if (!enabled) return;
     const html = e.detail.message;
     if (!html.includes('beforeend:#dialog-container')) return;
     if (!html.includes('data-mtype="prompt"')) return;
@@ -458,25 +462,28 @@ document.querySelectorAll('#dialog-container [data-mtype]').forEach(addPlayBtn);
 
 // Watch for new messages
 const playBtnObserver = new MutationObserver(muts => {
+    if (!enabled) return;
     for (const m of muts)
         for (const n of m.addedNodes)
             if (n.nodeType === 1) n.querySelectorAll?.('[data-mtype]').forEach(addPlayBtn);
 });
 playBtnObserver.observe(document.getElementById('dialog-container'), { childList: true });
 
-// --- Cleanup ---
-window[Symbol.for('solveit.voice.cleanup')] = () => {
-    playBtnObserver.disconnect();
+// --- Enable / Disable ---
+function voiceDisable() {
+    enabled = false;
     go('off');
-    ac.abort();
-    clearInterval(watchdog);
-    tts.cleanup();
-    uiCleanup();
-};
+    tts.stop();
+    uiDisable();
+}
 
-// Listen for disable message from content script
+function voiceEnable() {
+    enabled = true;
+    uiEnable();
+}
+
 window.addEventListener('message', (e) => {
-    if (e.source === window && e.data?.type === 'solveit-voice-cleanup') {
-        window[Symbol.for('solveit.voice.cleanup')]?.();
-    }
+    if (e.source !== window) return;
+    if (e.data?.type === 'solveit-voice-disable') voiceDisable();
+    if (e.data?.type === 'solveit-voice-enable') voiceEnable();
 });

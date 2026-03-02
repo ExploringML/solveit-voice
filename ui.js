@@ -227,12 +227,13 @@ document.addEventListener('click', (e) => {
 
 export { CLR };
 
-export function cleanup() {
-    ac.abort();
+export function disable() {
     speechSynthesis?.cancel();
-    if (audioCtx) try { audioCtx.close(); } catch(e) {}
-    document.querySelectorAll('.sv-play').forEach(el => el.remove());
-    div.remove();
-    document.getElementById('solveit-voice-styles')?.remove();
-    document.querySelector('script[data-solveit-voice]')?.remove();
+    div.style.display = 'none';
+    document.querySelectorAll('.sv-play').forEach(el => el.style.display = 'none');
+}
+
+export function enable() {
+    div.style.display = '';
+    document.querySelectorAll('.sv-play').forEach(el => el.style.display = '');
 }
