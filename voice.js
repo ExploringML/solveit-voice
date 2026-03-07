@@ -248,10 +248,14 @@ const watchdog = setInterval(() => {
 async function sendTranscript(text) {
     setStatus('📤 Sending: ' + text.slice(0, 40) + '...', CLR.warn);
     try {
-        const body = new URLSearchParams({
+        const params = {
             dlg_name: getDname(), content: (autoCb.checked ? '🎤 Voice [autorun]: ' : '🎤 Voice: ') + text,
-            msg_type: msgType, placement: 'at_end', run_mode: msgType === 'prompt' ? 'run' : 'no_run'
-        });
+            msg_type: msgType, placement: 'at_end'
+        };
+        // Only prompts auto-run. The server treats ANY run_mode string as truthy,
+        // so we must OMIT the key entirely for code/note messages (not send 'no_run').
+        if (msgType === 'prompt') params.run_mode = 'run';
+        const body = new URLSearchParams(params);
         const resp = await fetch('/add_relative_', { method: 'POST', body });
         if (resp.ok) setStatus('✅ Sent!', CLR.ok);
         else setStatus('❌ Error: ' + resp.status, CLR.err);
