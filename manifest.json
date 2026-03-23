@@ -1,17 +1,40 @@
 {
   "manifest_version": 3,
   "name": "SolveIt Voice",
-  "version": "0.2",
-  "description": "Voice control for SolveIt — speak commands, hear AI responses, hands-free coding.",
-  "content_scripts": [{
-    "matches": ["<all_urls>"],
-    "js": ["content.js"],
-    "run_at": "document_idle"
-  }],
+  "version": "1.0",
+  "description": "Voice control for SolveIt — wake word, speech commands, Kokoro TTS, Porcupine detection",
+
+  "content_scripts": [
+    {
+      "matches": ["https://*.solve.it.com/*"],
+      "css": ["content.css"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+
   "action": { "default_popup": "popup.html" },
-  "permissions": ["storage", "tabs"],
+  "permissions": ["storage"],
+  "host_permissions": ["https://api.replicate.com/*", "https://api.github.com/*"],
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
   "web_accessible_resources": [{
-    "resources": ["ui.js", "voice.js"],
-    "matches": ["<all_urls>"]
+    "resources": [
+      "widget.js",
+      "state-machine.js",
+      "send.js",
+      "tts.js",
+      "kokoro.js",
+      "porcupine.js",
+      "save-toggle.js",
+      "draggable.js",
+      "visibility.js",
+      "solvent_en_wasm_v4_0_0.ppn",
+      "porcupine_params.pv"
+    ],
+    "matches": ["https://*.solve.it.com/*"]
   }]
 }

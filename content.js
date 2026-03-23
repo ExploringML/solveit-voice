@@ -1,68 +1,147 @@
-(async function() {
-    const DEBUG = false;
-    const log = (...args) => DEBUG && console.log('[SolveIt Voice]', ...args);
+// ═══════════════════════════════════════════════════════════════
+// SolveIt Voice — Content Script Loader
+//
+// DESIGN: Inject voice modules into the page's MAIN world in order.
+// Each module attaches to window._voice (the shared bridge).
+// Follows the minimap extension pattern: content.js loads scripts,
+// scripts self-heal via watchdog and AbortController cleanup.
+//
+// API KEYS: Read from chrome.storage, passed to page via data-*
+// attributes on <html>. Scripts read keys at call-time via getters.
+// ═══════════════════════════════════════════════════════════════
 
-    log('content script running, url:', location.href);
+(async function () {
+  const log = (...args) => console.log('[sv-loader]', ...args);
 
-    // Listen for key updates from the page and save to storage
-    window.addEventListener('message', (e) => {
-        if (e.source !== window || e.data?.type !== 'solveit-save-key') return;
-        const { key, value } = e.data;
-        chrome.storage.local.set({ [key]: value });
-        document.documentElement.dataset[key === 'openAiKey' ? 'solveitOpenAiKey' : 'solveitElevenKey'] = value;
+  log('content script running, url:', location.href);
+
+  // Only inject on dialog pages — skip dashboard, terminal, folder views
+  // DESIGN: Dialog pages have /dialog_ in the path. Other pages
+  // (dashboard, terminal) don't need voice control.
+  if (!location.pathname.startsWith('/dialog_')) {
+    log('not a dialog page, skipping voice injection');
+    return;
+  }
+
+  const alive = () => !!chrome.runtime?.id;
+
+  function loadScript(path) {
+    return new Promise((resolve, reject) => {
+      if (!alive()) return reject(new Error('extension context invalidated'));
+      const s = document.createElement('script');
+      // DESIGN: Load from extension's own files via chrome.runtime.getURL.
+      // This gives a chrome-extension:// URL that the page can access
+      // because these files are listed in web_accessible_resources.
+      s.src = chrome.runtime.getURL(path);
+      s.dataset.solveitVoice = '1';
+      // DESIGN: MAIN world injection — script runs in the page's JS context,
+      // not the extension's isolated content script world. This is required
+      // because we need access to page globals (debounceScroll, htmx events).
+      s.onload = () => { log('loaded:', path); resolve(); };
+      s.onerror = () => reject(new Error('failed to load ' + path));
+      document.head.appendChild(s);
     });
+  }
 
-    async function inject() {
-        log('inject() called');
-        if (document.querySelector('script[data-solveit-voice]')) { log('script already loaded, skipping'); return; }
-        const dname = new URLSearchParams(window.location.search).get('name')
-            || document.getElementById('dlg_name')?.value;
-        if (!dname) { log('no dname, skipping'); return; }
-        const { openAiKey = '', elevenKey = '' } = await chrome.storage.local.get(['openAiKey', 'elevenKey']);
-        document.documentElement.dataset.solveitDname = dname;
-        document.documentElement.dataset.solveitOpenAiKey = openAiKey || '';
-        document.documentElement.dataset.solveitElevenKey = elevenKey || '';
-        const s = document.createElement('script');
-        s.type = 'module';
-        s.dataset.solveitVoice = '1';
-        s.src = chrome.runtime.getURL('voice.js');
-        document.head.appendChild(s);
-        log('voice.js injected');
+  // Pass API keys from chrome.storage to page via data-* attributes.
+  // DESIGN: Scripts can't access chrome.storage from MAIN world,
+  // so we bridge the gap through DOM data attributes on <html>.
+  // Scripts read these at call-time: document.documentElement.dataset.solveitXxxKey
+  const keys = await chrome.storage.local.get({
+    porcupineKey: '',
+    replicateKey: '',
+    enabled: true
+  });
+
+  if (!keys.enabled) {
+    log('extension disabled via popup, skipping');
+    return;
+  }
+
+  // DESIGN: Extract dialog name from URL query param or hidden input.
+  // widget.js reads this via getDname() for HTTP POST to /add_relative_.
+  const dname = new URLSearchParams(location.search).get('name')
+      || document.getElementById('dlg_name')?.value;
+  if (!dname) { log('no dname found, skipping injection'); return; }
+  document.documentElement.dataset.solveitDname = dname;
+
+  document.documentElement.dataset.solveitPorcupineKey = keys.porcupineKey || '';
+  document.documentElement.dataset.solveitReplicateKey = keys.replicateKey || '';
+
+  // Listen for key updates from popup (while page is open)
+  // DESIGN: When user changes keys in popup.html, popup.js sends
+  // a message to this content script, which updates the data-* attrs.
+  chrome.storage.onChanged.addListener((changes) => {
+    if (changes.porcupineKey) {
+      document.documentElement.dataset.solveitPorcupineKey = changes.porcupineKey.newValue || '';
     }
-
-    async function tryInit() {
-        if (!document.getElementById('dialog-container')) { log('no dialog-container'); return; }
-        let enabled = true;
-        try { ({ enabled = true } = await chrome.storage.local.get('enabled')); }
-        catch(e) { log('extension context invalidated, skipping'); return; }
-        if (!enabled) { log('disabled, skipping'); return; }
-        if (document.querySelector('script[data-solveit-voice]')) {
-            const dname = new URLSearchParams(window.location.search).get('name')
-                || document.getElementById('dlg_name')?.value;
-            document.documentElement.dataset.solveitDname = dname || '';
-            log('script loaded, sending reinit, dname:', dname);
-            window.postMessage({ type: 'solveit-voice-reinit' }, '*');
-        } else {
-            inject();
-        }
+    if (changes.replicateKey) {
+      document.documentElement.dataset.solveitReplicateKey = changes.replicateKey.newValue || '';
     }
+    if (changes.enabled && !changes.enabled.newValue) {
+      log('extension disabled, cleaning up');
+      if (window._voiceCleanup) window._voiceCleanup();
+    }
+  });
 
-    // Listen for toggle messages from popup
-    chrome.runtime.onMessage.addListener((msg) => {
-        if (msg.type !== 'solveit-voice-toggle') return;
-        if (msg.enabled) {
-            if (!document.getElementById('dialog-container')) { log('toggle on: no dialog-container'); return; }
-            if (!document.querySelector('script[data-solveit-voice]')) inject();
-            else window.postMessage({ type: 'solveit-voice-enable' }, '*');
-        } else {
-            window.postMessage({ type: 'solveit-voice-disable' }, '*');
-        }
-    });
+  // --- Bridge: MAIN world → content script → background service worker ---
+  // DESIGN: Scripts in MAIN world can't call chrome.runtime.sendMessage().
+  // So kokoro.js posts a window message, content.js catches it here,
+  // forwards to background.js, and posts the response back.
+  window.addEventListener('message', async (e) => {
+    if (e.source !== window || e.data?.type !== 'replicate-fetch') return;
+    const { url, method, headers, body, requestId } = e.data;
+    try {
+      const resp = await chrome.runtime.sendMessage({
+        type: 'replicate-fetch', url, method, headers, body
+      });
+      window.postMessage({ type: 'replicate-fetch-response', requestId, ...resp }, '*');
+    } catch (err) {
+      window.postMessage({ type: 'replicate-fetch-response', requestId, ok: false, error: err.message }, '*');
+    }
+  });
 
-    // Try now, and also after any HTMX navigation
-    await tryInit();
-    document.body.addEventListener('htmx:afterSettle', () => {
-        log('htmx:afterSettle fired');
-        tryInit();
-    });
+  // --- Bridge: Gist API (same pattern as Replicate bridge above) ---
+  // DESIGN: widget.js posts gist-fetch, content.js forwards to background.js,
+  // background.js proxies the GitHub API call, response flows back.
+  window.addEventListener('message', async (e) => {
+    if (e.source !== window || e.data?.type !== 'gist-fetch') return;
+    const { url, method, headers, body, requestId } = e.data;
+    try {
+      const resp = await chrome.runtime.sendMessage({
+        type: 'gist-fetch', url, method, headers, body
+      });
+      window.postMessage({ type: 'gist-fetch-response', requestId, ...resp }, '*');
+    } catch (err) {
+      window.postMessage({ type: 'gist-fetch-response', requestId, ok: false, error: err.message }, '*');
+    }
+  });
+
+  // Guard: don't double-inject if scripts already loaded
+  if (document.querySelector('script[data-solveit-voice]')) {
+    log('scripts already loaded, skipping');
+    return;
+  }
+
+  // DESIGN: Load scripts in strict order — each module depends on
+  // the previous one having attached its exports to window._voice.
+  // widget.js creates V = window._voice, all others read from it.
+  const modules = [
+    'widget.js',          // Main widget DOM + SpeechRecognition + beeps
+    'state-machine.js',   // 5-state machine (idle/listen/command/send/manual)
+    'send.js',            // HTTP POST to /add_relative_
+    'tts.js',             // Browser TTS + response watcher
+    'kokoro.js',          // Kokoro TTS via Replicate API (browser-side)
+    'porcupine.js',       // Porcupine wake word detection
+    'save-toggle.js',     // TTS audio bookmark (localStorage)
+    'draggable.js',       // Drag widget around screen
+    'visibility.js',      // Pause/resume on tab switch
+  ];
+
+  try {
+    for (const mod of modules) await loadScript(mod);
+    log('all modules loaded');
+  } catch (e) {
+    log('module load error:', e.message);
+  }
 })();

@@ -2,19 +2,42 @@
 <html>
 <head>
   <style>
-    body { width: 200px; padding: 12px; font-family: system-ui; font-size: 14px; }
-    .row { display: flex; align-items: center; justify-content: space-between; }
-    .track { display: inline-block; width: 36px; height: 18px; border-radius: 9px; background: #ccc; position: relative; cursor: pointer; transition: background 0.2s; }
-    .track.on { background: #4caf50; }
-    .track::after { content: ''; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: white; transition: transform 0.2s; }
-    .track.on::after { transform: translateX(18px); }
+    body { width: 260px; padding: 12px; font-family: system-ui; font-size: 13px; background: #1a1a2e; color: #ccc; }
+    h3 { margin: 0 0 10px; font-size: 14px; color: #fff; }
+    .row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .track { display: inline-block; width: 36px; height: 18px; border-radius: 9px; background: #555; position: relative; cursor: pointer; transition: background 0.2s; }
+    .track.on { background: #6bff6b; }
+    .track::after { content: ''; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #888; transition: transform 0.2s, background 0.2s; }
+    .track.on::after { transform: translateX(18px); background: #fff; }
+    label { display: block; font-size: 0.8em; color: #888; margin: 10px 0 3px; }
+    input[type="password"], input[type="text"] {
+      width: 100%; box-sizing: border-box; padding: 6px 8px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 6px; color: #fff; font-size: 12px; font-family: monospace;
+    }
+    input:focus { outline: none; border-color: #6bc5ff; }
+    .status { font-size: 0.75em; color: #6bff6b; margin-top: 6px; display: none; }
+    hr { border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 10px 0; }
   </style>
 </head>
 <body>
+  <h3>🎤 SolveIt Voice</h3>
+
   <div class="row">
-    <span>SolveIt Voice</span>
+    <span>Enabled</span>
     <div id="toggle" class="track on"></div>
   </div>
+
+  <hr>
+
+  <label>🦔 Porcupine Access Key</label>
+  <input type="password" id="porcupineKey" placeholder="Enter Porcupine key...">
+
+  <label>🤖 Replicate API Key</label>
+  <input type="password" id="replicateKey" placeholder="Enter Replicate key...">
+
+  <div id="status" class="status">✅ Saved</div>
+
   <script src="popup.js"></script>
 </body>
 </html>

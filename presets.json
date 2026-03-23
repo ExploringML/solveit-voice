@@ -1,0 +1,98 @@
+{
+  "organize": [
+    {
+      "name": "Build Section TOC",
+      "text": "> First, use function calls to figure out the current H1 section heading note message.\n> Second, use `curr_dialog()` to get the accurate current dialog path — do NOT rely on memory for the path.\n> Third, build a ## 📑 Section TOC note for the current H1 section. Use your memory — do NOT use tool calls to read messages. For each prompt, summarize the core idea from its OUTPUT (the output is what matters most) and use that as the link description. Format as numbered list using **raw links** (NOT anchor tags, NOT markdown links):\n> 1. summary of prompt output essential idea #dialog/path/_msgid\n> **Raw links are the ONLY format that works for cross-dialog navigation.** Do NOT use `<a href=\"...\">` or `[text](#...)` — those only navigate within the current dialog.\n> Also, **review the H1 section title** — if it's too vague or inconsistent with the actual section contents, suggest a more descriptive title and update it.\n> Place the TOC note right after the H1 heading.\n> Finally, check if any messages in the section have HTML comment tags (e.g. `<!-- tag:tag_name #color -->`). If found, add a final item to the Section TOC list noting which tag names are available in this section. Format:\n> N. 🏷️ Tagged messages available: `tag_name` (N messages) — use `find_msgs(re_pattern='tag_name', dname='...')` to extract\n> This ensures when the Section TOC is later extracted into a reference dialog, readers know which tags exist and can programmatically copy tagged messages."
+    },
+    {
+      "name": "Update Section TOC",
+      "text": "First, use function calls to figure out the current H1 section heading note message, \nThen, Update the existing ## 📑 Section TOC for this section. Use your memory — no tool calls to read messages. Only add entries for new important prompts whose outputs have substantial content. Summarize the core idea from each output as the link description. Keep existing entries intact."
+    },
+    {
+      "name": "add section toc summary",
+      "text": "First, use function call to find the current H1 heading section;\nSecond, use your memory not use function calls to read every message, to create a summary for this section and put it inside section toc\nmake sure to use $`curation_exploration` prompt variable to generate the summay in its maximum details to capture all the learning points we explored in this section\nAlso, check if any messages in the section have HTML comment tags (e.g. `<!-- tag:tag_name #color -->`). If found, add a 🏷️ Tags section at the end of the summary listing each tag name and how many messages carry it. Format: `🏷️ Tagged messages available: tag_name (N messages)`"
+    },
+    {
+      "name": "Download Extension",
+      "text": "Give me `download_folder_` function call in fenced code for the Chrome extension folder in the current directory so I can test it locally."
+    },
+    {
+      "name": "Push Repo to GitHub",
+      "text": "First, find the cloned repo path in current directory and its proper repo name on github, Then push the cloned repo using push_repo_to_github()"
+    },
+    {
+      "name": "Backup to GitHub",
+      "text": "First call curr_dialog() to get the exact dialog path. Then run backup_to_github() with a descriptive commit message that includes the correct dialog path."
+    },
+    {
+      "name": "add section summary (depth)",
+      "text": "read the curation note autobiographic flowchart from 35 curation dialog, apply it to this current section to create a comprehensive summary, which capture the exploration process through which all the core issues or bugs and solutions attempted are clearly explained so that a 10 year old could understand with clarity. \nThen add this summary to the section toc"
+    },
+    {
+      "name": "Copy Section TOC to Target Dialog",
+      "text": "First, use function calls to find the current H1 section and its ## 📑 Section TOC note.\nSecond, find the # 📑 Table of Contents note in the target dialog: ___TARGET_DIALOG___\nThird, copy BOTH the H1 section heading AND the Section TOC note to the target dialog — place the H1 heading right after the target dialog's Table of Contents note, then the Section TOC immediately after the H1 heading.\nLeave the originals in place — copy only, do not move.\nIf the section title and toc are already there, then replace the old with the newly copied version"
+    },
+    {
+      "name": "Translate Sketches to Chinese",
+      "text": "Find all note messages tagged with the current section's tag name (look for `<!-- tag:TAG_NAME -->` in note messages). For each sketch:\n1. Keep the ASCII art structure, boxes, arrows, and emojis exactly as they are\n2. Translate ONLY the English words into Chinese — concise, funny, kid-friendly style\n3. Keep analogies and humor equivalent (don't translate literally — find the Chinese equivalent that's just as fun)\n4. Keep technical terms in English with Chinese in parentheses, e.g. \"Fab (抗原结合区)\"\n5. Create each translated sketch as a new note message with tag `<!-- tag:TAG_NAME_cn #ffb86b -->`\n\nDo NOT change any ASCII lines, box borders, emoji placement, or spacing. Only replace English text with Chinese."
+    },
+    {
+      "name": "Download Sketches & Post to 小红书",
+      "text": "Do these steps:\n1. Find the tag name used in the current section's sketches (look for `<!-- tag:TAG_NAME -->` in note messages). If multiple tags, ask which one.\n2. Provide `await sketch_download('TAG_NAME')` in a fenced code block for me to run — this renders tagged notes as images with a download button.\n3. After I confirm the download works, generate a 小红书 post:\n   - **Title:** concise Chinese, includes emoji, describes the content (e.g. 🧬 7张图看懂抗体和免疫系统)\n   - **Description:** 1-2 sentences max, ends with tiny `generated with SolveIt`\n   - **Tags:** 5-6 relevant Chinese hashtags for discoverability\n   - Do NOT claim kids can understand — say it's the goal (让知识人人都能懂)\n   - Keep SolveIt mention minimal and at the bottom"
+    }
+  ],
+  "build": [
+    {
+      "name": "plan this feature",
+      "text": "apply \"plan this feature\" the first trigger, help me understand the design comprehensively"
+    },
+    {
+      "name": "test this step",
+      "text": "So, have we finished this step? if so,  How should I test the modifications or the step completed to make sure everything work as expected"
+    },
+    {
+      "name": "explain the issue & fix",
+      "text": "explain the issue/bug comprehensively using rewrite4kid style without losing any details and then explain how the fix solve the problem accordingly"
+    }
+  ],
+  "read": [
+    {
+      "name": "walk me through",
+      "text": "use function call to figure out where is the current section, and then apply \"walk me through this\" trigger to explain the issues, bugs and related learning points and solutions in this current section"
+    },
+    {
+      "name": "sketch concepts",
+      "text": "please apply \"sketch this concept\" on issues, bugs and their related solutions and learning points in this section"
+    },
+    {
+      "name": "step 1 - rewrite4kid on a section",
+      "text": "Apply $rewrite4kid style. Rewrite every paragraph in this section. \n\nRules:\n- Preserve all medical/scientific terminology BUT for every term and concept, \n  explain it comprehensively with full context — not just a one-sentence \n  definition. Medical textbooks often mention terms without explanation. \n  Add the surrounding context a child would need to truly understand each one. \n  Use vivid analogies and visual language.\n- Do NOT lose any complexity, nuance, or detail. In fact, ADD more context \n  and explanation than the original provides — draw from understanding of \n  the entire section to fill in gaps the textbook leaves implicit.\n- Rewrite ALL paragraphs and put them together in one continuous rewrite \n  section — do not interleave with the originals."
+    },
+    {
+      "name": "step 1.5A - trace mechanism",
+      "text": "Apply $rewrite4kid style. Trace the full biological mechanism described \nin the rewritten paragraphs, step by step. Read autobiographical_flowchart \nfrom Dialog 35 (35_curation_navigator) and follow its format — every step \ngets its full story told. Show the complete chain of cause and effect with \nfull context. This is a massive exploration — cover every mechanism, every \nprocess, every cause-and-effect chain in the section. If one response isn't \nenough, I'll say \"continue\" until we've explored everything."
+    },
+    {
+      "name": "step 1.5B - body wonder",
+      "text": "Now let's reflect. Add Body Wonder moments for what we just explored. \nRead body_wonder_and_health_practices from Dialog 35 (35_curation_navigator). \nApply the 3-step formula: relatable human experience → human failure → \nbody's effortless decades. One Body Wonder per major concept. Make it \nhumorous, inspiring, awe-inducing."
+    },
+    {
+      "name": "step 1.5C - derive health practices",
+      "text": "Now let's derive best health practices from the mechanisms we explored. \nRead body_wonder_and_health_practices from Dialog 35 (35_curation_navigator). \nFollow the deduction chain: MECHANISM → LOGIC → ACTION → CONFIDENCE \n(🟢🟡🔴) → EVIDENCE CHECK. Group by category: 🍽️ eating, 🏋️ exercise, \n😴 sleep, 🧘 breathing, ⚠️ avoid. Help us know what to DO about what \nwe just learned."
+    },
+    {
+      "name": "step 2 - extract & sketch",
+      "text": "Apply $rewrite4kid style. Read flowchart_as_sketchbook from Dialog 35 \n(35_curation_navigator). Now look at EVERYTHING we generated above — all \nmechanisms, cause-and-effect chains, body wonders, best practices, \ntreatments, and prevention strategies. \n\nFirst, create a comprehensive numbered list of ALL individual facts, \nmechanisms, and practices — each item is one small, concise piece of the \nentire process. Aim for 20-30+ items. The more the better — smaller \npieces mean more focused diagrams.\n\nThen draw one ASCII diagram per list item. Rules:\n- Minimal words, maximum visual\n- Use emojis large enough to be recognizable (repeat to fill shapes)\n- Arrows must be directionally accurate\n- Use simple terms (top/bottom not proximal/distal)\n- Each diagram in a separate note message inside a markdown block\n- Do 2-3 diagrams per response — I'll say \"continue\" for more"
+    }
+  ],
+  "controller": [
+    {
+      "name": "Extract Dialog TOC",
+      "text": "1. use create_or_run_dialog to set the source dialog in running in the background, and find the code message contains `await generate_dialog_toc()` which sit before MAIN note message, and run this code message\n2. Read the `# 📋 How to Extract Dialog TOC Into Current Dialog` curation note from Dialog 35 (`/myGems/buildCurationSystem/curation_dialogs/35_curation_navigator`). Follow all steps in that note to extract the Dialog TOC from the following source dialog:\n\nSource dialog:"
+    },
+    {
+      "name": "Extract Tagged Messages",
+      "text": "Find all messages with the specified tag name in the source dialog using `find_msgs(re_pattern='TAG_NAME', dname='SOURCE_DIALOG')`, then copy each one into the current dialog after the current position. Do it programmatically with `pyrun()`.\n\nSource dialog: \nTag name: "
+    }
+  ]
+}

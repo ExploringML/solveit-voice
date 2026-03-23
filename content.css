@@ -1,0 +1,179 @@
+/* ═══════════════════════════════════════════════════════════════
+   SolveIt Voice — Widget Stylesheet
+   
+   DESIGN: All CSS extracted from inline styles in the curation
+   dialog's iife() calls. Centralised here for maintainability.
+   The widget uses fixed positioning (bottom-right corner) and
+   dark glassmorphism styling to match SolveIt's dark theme.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* --- Main Widget Container --- */
+#voice-widget {
+  position: fixed;
+  bottom: 107px;
+  right: 46px;
+  z-index: 9999;
+  background: rgba(15, 15, 25, 0.85);
+  backdrop-filter: blur(12px);
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: system-ui;
+  cursor: grab;
+}
+
+/* --- Mic Button --- */
+#voice-widget .v-mic {
+  font-size: 1.8em;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+}
+
+/* --- Status Text --- */
+#voice-widget .v-status {
+  color: #aaa;
+  font-size: 0.8em;
+  width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --- TTS Stop Button --- */
+#voice-widget .v-tts-stop {
+  font-size: 0.85em;
+  border: none;
+  background: rgba(255, 100, 100, 0.2);
+  border-radius: 8px;
+  padding: 4px 10px;
+  color: #ff6b6b;
+  cursor: pointer;
+}
+
+/* --- Gear Button --- */
+#voice-widget .v-gear {
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 5px 8px;
+  cursor: pointer;
+  font-size: 1.1em;
+  color: #aaa;
+  transition: all 0.2s;
+}
+
+/* --- Gear Dropdown Menu --- */
+#voice-widget .v-dropdown {
+  position: absolute;
+  right: 0;
+  bottom: 52px;
+  background: rgba(30, 30, 50, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 6px 0;
+  min-width: 180px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  display: none;
+}
+
+/* --- Toggle Switch Rows --- */
+#voice-widget .v-switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 14px;
+  cursor: pointer;
+  color: #ccc;
+  font-size: 0.82em;
+}
+#voice-widget .v-switch-row:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* --- Toggle Track (ON/OFF slider) --- */
+#voice-widget .v-track {
+  display: inline-block;
+  width: 28px;
+  height: 14px;
+  border-radius: 7px;
+  position: relative;
+  transition: background 0.2s;
+  cursor: pointer;
+}
+
+/* --- Toggle Thumb --- */
+#voice-widget .v-thumb {
+  position: absolute;
+  top: 1px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+/* --- Gear Wrap (relative container for dropdown) --- */
+#voice-widget .v-gear-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* --- Anchor Label (shows selected message ID) --- */
+#voice-widget .v-anchor-label {
+  padding: 2px 14px 6px;
+  color: #ffd93d;
+  font-size: 0.72em;
+  font-family: monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --- Kokoro Audio Container --- */
+/* DESIGN: Now a child of #voice-widget — no fixed positioning needed.
+   Widget drag moves it automatically. */
+#kokoro-audio-container {
+  display: none;
+  position: absolute;
+  bottom: -90px;
+  left: 0;
+  z-index: 9998;
+  background: rgba(15, 15, 25, 0.85);
+  backdrop-filter: blur(12px);
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  width: 400px;
+}
+
+#kokoro-audio-container audio {
+  width: 100%;
+  height: 48px;
+  border-radius: 8px;
+}
+
+#kokoro-audio-container .kokoro-status {
+  color: #6bc5ff;
+  font-size: 0.7em;
+  font-family: system-ui;
+}
+
+#kokoro-audio-container .kokoro-close {
+  border: none;
+  background: rgba(255, 100, 100, 0.2);
+  border-radius: 6px;
+  padding: 2px 8px;
+  color: #ff6b6b;
+  cursor: pointer;
+  font-size: 0.8em;
+}
